@@ -17,12 +17,21 @@ from flwr.client.numpy_client import NumPyClientWrapper
 from flwr.server.strategy.dp_adaptive_clip_strategy import DPAdaptiveClipStrategy
 from flwr.common import weights_to_parameters
 class EmnistRayClient(fl.client.NumPyClient):
+    seed = 0
     def __init__(self, cid):
+        self.__set_seed()
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
         self.cid = cid
         self.model = get_model()
+
+    def __set_seed(self):
+        random.seed(args.seed)
+        np.random.seed(args.seed)
+        tf.random.set_seed(args.seed)
+
     def get_parameters(self):
         return self.model.get_weights()
+
     def get_properties(self, ins):
         return self.properties
 
@@ -61,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_clients_per_round",
         type=int,
-        default=50,
+        default=10,
         help="Number of available clients used for fit (default: 50)",
     )
 
@@ -84,7 +93,7 @@ if __name__ == "__main__":
     random.seed(args.seed)
     np.random.seed(args.seed)
     tf.random.set_seed(args.seed)
-    
+    EmnistRayClient.seed = args.seed
     
     total_num_clients = get_num_total_clients()
     
