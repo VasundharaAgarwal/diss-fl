@@ -98,6 +98,12 @@ if __name__ == "__main__":
     
     total_num_clients = get_num_total_clients()
     
+    client_resources = {
+        "num_cpus": 1,
+    }
+    gpus =  tf.config.list_physical_devices('GPU')
+    if len(gpus):
+        client_resources["num_gpus"] = 0.5
     
     init_model = get_model()
 
@@ -134,5 +140,6 @@ if __name__ == "__main__":
         num_rounds=args.num_rounds,
         strategy=dp_strategy,
         ray_init_args=ray_config,
+        client_resources = client_resources,
         path_to_save_metrics=path_to_save_metrics
     )

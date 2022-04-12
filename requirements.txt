@@ -1,0 +1,4 @@
+#flwr @ file:///Users/vasundhara1/Desktop/diss-fl/flower
+git+https://github.com/VasundharaAgarwal/flower.git#egg=flwr
+tensorflow==2.5.0
+tensorflow-federated==0.19.0
