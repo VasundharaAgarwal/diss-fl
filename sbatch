@@ -5,7 +5,7 @@
 
 source /nfs-share/va308/diss-fl/env/bin/activate 
 
-zs = (0 0.1 0.5 0.75 1)
+zs = (0 0.2 0.5 0.75 1)
 
 for seed in {0..4}
     do
