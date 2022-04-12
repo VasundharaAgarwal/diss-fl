@@ -1,6 +1,6 @@
 #!/bin/zsh
-#SBATCH --cpus-per-task 12
-#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task 1
+#SBATCH --gres=gpu:gtx1080:5
 #SBATCH --job-name=diss_fl
 
 source /nfs-share/va308/diss-fl/env/bin/activate 
