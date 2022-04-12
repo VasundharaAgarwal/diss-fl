@@ -88,6 +88,11 @@ if __name__ == "__main__":
         default=1,
         help="Noise multiplier (default: 1)"
     )
+    parser.add_argument(
+        "--results_dir",
+        type=str,
+        default="results"
+    )
     print("Starting")
     # Seeding
     args = parser.parse_args()
@@ -129,7 +134,7 @@ if __name__ == "__main__":
     ray_config = {"include_dashboard": False}
     print("Starting training")
     # start simulation
-    results_dir = Path("results")
+    results_dir = Path(args.results_dir)
     path_to_save_metrics = results_dir / "clients_{}_seed_{}_z_{}".format(args.num_clients_per_round, args.seed, args.noise_multiplier)
     if  path_to_save_metrics.exists():
         shutil.rmtree(path_to_save_metrics)
