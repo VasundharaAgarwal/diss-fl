@@ -3,7 +3,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=diss_fl
 
-#source /nfs-share/va308/diss-fl/env/bin/activate 
+source /nfs-share/va308/diss-fl/env/bin/activate 
 
 zs=(0 0.2 0.5 0.75 1)
 
