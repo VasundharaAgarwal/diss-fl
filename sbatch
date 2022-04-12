@@ -11,7 +11,7 @@ for seed in {0..4}
     do
     for z in "${zs[@]}"
     do
-        command="python main.py --noise_multiplier $z --seed $seed --results_dir /nfs-share/va308/diss-fl"
+        command="python3 main.py --noise_multiplier $z --seed $seed --results_dir /nfs-share/va308/diss-fl/results"
         eval "$command"
     done
 done
