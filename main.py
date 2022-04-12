@@ -4,10 +4,11 @@ from flwr.common.typing import Scalar
 import argparse
 import numpy as np
 import os
+import shutil
+from pathlib import Path
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import tensorflow as tf
 import random
-import traceback
 from pathlib import Path
 from typing import Dict
 
@@ -64,13 +65,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_rounds",
         type=int,
-        default=1,
+        default=100,
         help="Number of rounds of federated learning (default: 1)",
     )
     parser.add_argument(
         "--num_clients_per_round",
         type=int,
-        default=10,
+        default=50,
         help="Number of available clients used for fit (default: 50)",
     )
 
@@ -122,10 +123,16 @@ if __name__ == "__main__":
     ray_config = {"include_dashboard": False}
     print("Starting training")
     # start simulation
+    results_dir = Path("results")
+    path_to_save_metrics = results_dir / "clients_{}_seed_{}_z_{}".format(args.num_clients_per_round, args.seed, args.noise_multiplier)
+    if  path_to_save_metrics.exists():
+        shutil.rmtree(path_to_save_metrics)
+    Path.mkdir(path_to_save_metrics, parents=True)
     fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=total_num_clients,
         num_rounds=args.num_rounds,
         strategy=dp_strategy,
         ray_init_args=ray_config,
+        path_to_save_metrics=path_to_save_metrics
     )
