@@ -113,15 +113,15 @@ if __name__ == "__main__":
     init_model = get_model()
 
 
-    strategy = fl.server.strategy.FedAvgM(
+    strategy = fl.server.strategy.FedAvg(
         fraction_fit= args.num_clients_per_round/total_num_clients, 
         fraction_eval = 0,
         min_fit_clients=10,
         min_available_clients=total_num_clients,  # All clients should be available
         eval_fn=get_eval_fn(), 
-        server_learning_rate = 1.0, 
-        server_momentum = 0.9,
-        initial_parameters = weights_to_parameters(init_model.get_weights())# centralised testset evaluation of global model
+        # server_learning_rate = 1.0, 
+        # server_momentum = 0.9,
+        # initial_parameters = weights_to_parameters(init_model.get_weights())# centralised testset evaluation of global model
     )
     dp_strategy = DPAdaptiveClipStrategy(strategy, total_num_clients, args.noise_multiplier)
 
