@@ -79,6 +79,12 @@ if __name__ == "__main__":
         type=str,
         default="results"
     )
+    parser.add_argument(
+        "--run_num",
+        type=int,
+        default=0,
+        help="Run number for the particular config."
+    )
     print("Starting")
     # Seeding
     args = parser.parse_args()
@@ -116,10 +122,10 @@ if __name__ == "__main__":
     print("Starting training")
     # start simulation
     results_dir = Path(args.results_dir)
-    path_to_save_metrics = results_dir / "clients_{}_z_{}_rounds_{}".format(args.num_clients_per_round, args.noise_multiplier, args.num_rounds)
-    if  path_to_save_metrics.exists():
-        shutil.rmtree(path_to_save_metrics)
-    Path.mkdir(path_to_save_metrics, parents=True)
+    path_to_save_metrics = results_dir / "clients_{}_z_{}_rounds_{}_run_{}".format(args.num_clients_per_round, args.noise_multiplier, args.num_rounds, args.run_num)
+
+    if  not path_to_save_metrics.exists():
+        Path.mkdir(path_to_save_metrics, parents=True)
     fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=total_num_clients,
