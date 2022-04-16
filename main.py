@@ -18,17 +18,10 @@ from flwr.client.numpy_client import NumPyClientWrapper
 from flwr.server.strategy.dp_adaptive_clip_strategy import DPAdaptiveClipStrategy
 from flwr.common import weights_to_parameters
 class EmnistRayClient(fl.client.NumPyClient):
-    seed = 0
     def __init__(self, cid):
-        self.__set_seed()
         self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
         self.cid = cid
         self.model = get_model()
-
-    def __set_seed(self):
-        random.seed(args.seed)
-        np.random.seed(args.seed)
-        tf.random.set_seed(args.seed)
 
     def get_parameters(self):
         return self.model.get_weights()
@@ -76,13 +69,6 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--seed",
-        type=int,
-        default=0,
-        help="Initial seed (default: 0)"
-    )
-
-    parser.add_argument(
         "--noise_multiplier",
         type=float,
         default=1,
@@ -96,10 +82,6 @@ if __name__ == "__main__":
     print("Starting")
     # Seeding
     args = parser.parse_args()
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    tf.random.set_seed(args.seed)
-    EmnistRayClient.seed = args.seed
     
     total_num_clients = get_num_total_clients()
     
@@ -113,29 +95,28 @@ if __name__ == "__main__":
     init_model = get_model()
 
 
-    strategy = fl.server.strategy.FedAvg(
+    strategy = fl.server.strategy.FedAvgM(
         fraction_fit= args.num_clients_per_round/total_num_clients, 
         fraction_eval = 0,
         min_fit_clients=10,
         min_available_clients=total_num_clients,  # All clients should be available
         eval_fn=get_eval_fn(), 
-        # server_learning_rate = 1.0, 
-        # server_momentum = 0.9,
-        # initial_parameters = weights_to_parameters(init_model.get_weights())# centralised testset evaluation of global model
+        server_learning_rate = 1.0, 
+        server_momentum = 0.9,
+        initial_parameters = weights_to_parameters(init_model.get_weights())# centralised testset evaluation of global model
     )
     dp_strategy = DPAdaptiveClipStrategy(strategy, total_num_clients, args.noise_multiplier)
 
     def client_fn(cid: str):
         # create a single client instance
         return DPClient(NumPyClientWrapper(EmnistRayClient(cid)), adaptive_clip_enabled=True)
-        # return NumPyClientWrapper(EmnistRayClient(cid))
 
     # (optional) specify ray config
     ray_config = {"include_dashboard": False}
     print("Starting training")
     # start simulation
     results_dir = Path(args.results_dir)
-    path_to_save_metrics = results_dir / "clients_{}_seed_{}_z_{}".format(args.num_clients_per_round, args.seed, args.noise_multiplier)
+    path_to_save_metrics = results_dir / "clients_{}_z_{}_rounds_{}".format(args.num_clients_per_round, args.noise_multiplier, args.num_rounds)
     if  path_to_save_metrics.exists():
         shutil.rmtree(path_to_save_metrics)
     Path.mkdir(path_to_save_metrics, parents=True)
