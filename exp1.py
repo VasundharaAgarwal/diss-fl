@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--results_dir",
         type=str,
-        default="tfftutorial_results"
+        default="exp1_results"
     )
     parser.add_argument(
         "--run_num",
