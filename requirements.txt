@@ -1,3 +1,5 @@
 git+https://github.com/VasundharaAgarwal/flower.git#egg=flwr[simulation]
 tensorflow==2.5.3
 tensorflow-federated==0.19.0
+torch==1.11.0
+torchvision==0.12.0
