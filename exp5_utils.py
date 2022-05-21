@@ -37,7 +37,7 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from torch import Tensor
 from torchvision import datasets
-
+import numpy as np
 
 DATA_ROOT = Path("exp5_cifar10")
 
@@ -118,12 +118,14 @@ def train(
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-    print(f"Training {epochs} epoch(s) w/ {len(trainloader)} batches each")
+    print(f"Training {epochs} epoch(s) w/ {len(trainloader)/5} batches each")
     t = time()
     # Train the network
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
+            if i>= len(trainloader)/5:
+                break
             images, labels = data[0].to(device), data[1].to(device)
 
             # zero the parameter gradients
@@ -142,7 +144,6 @@ def train(
                 running_loss = 0.0
 
     print(f"Epoch took: {time() - t:.2f} seconds")
-
 
 def test(
     net: Net,

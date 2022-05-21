@@ -173,8 +173,7 @@ def main() -> None:
     
     model = exp5_utils.load_model(args.model)
     model.to(DEVICE)
-    # load (local, on-device) dataset
-    trainset, testset = exp5_utils.load_cifar()
+    trainset, testset = exp5_utils.load_cifar(download=True)
 
     # Start client
     client = CifarClient(args.cid, model, trainset, testset)
