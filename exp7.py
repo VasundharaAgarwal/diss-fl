@@ -1,5 +1,6 @@
 import flwr as fl
 from flwr.common.typing import Scalar
+from time import process_time
 
 import argparse
 import numpy as np
@@ -12,7 +13,7 @@ import random
 from pathlib import Path
 from typing import Dict
 
-from exp6_utils import get_num_total_clients, get_eval_fn, get_model, load_trainset, load_testset
+from utils import get_num_total_clients, get_eval_fn, get_model, load_trainset, load_testset
 from flwr.client.dp_client import DPClient
 from flwr.client.numpy_client import NumPyClientWrapper
 from flwr.server.strategy.dp_adaptive_clip_strategy import DPAdaptiveClipStrategy
@@ -35,8 +36,10 @@ class EmnistRayClient(fl.client.NumPyClient):
 
             # send model to device
             self.model.set_weights(parameters)
-            
+            start_time = process_time()
             self.model.fit(trainset, epochs=1, verbose=0)
+            end_time = process_time()
+            print("elapsed time 1", end_time - start_time)
 
             # return local model and statistics
             
@@ -56,24 +59,21 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--num_rounds",
-        type=int,
-        default=100,
-        help="Number of rounds of federated learning (default: 1)",
+        "--beta",
+        type=float,
+        default=0.9
     )
-    
     parser.add_argument(
         "--results_dir",
         type=str,
-        default="exp6_results"
+        default="exp7_results"
     )
-
     parser.add_argument(
-        "--target_quantile",
-        type=float,
-        default=0.5
+        "--run_num",
+        type=int,
+        default=0,
+        help="Run number for the particular config."
     )
-    
     print("Starting")
     # Seeding
     args = parser.parse_args()
@@ -91,16 +91,16 @@ if __name__ == "__main__":
 
 
     strategy = fl.server.strategy.FedAvgM(
-        fraction_fit= 100/total_num_clients, 
+        fraction_fit= 50/total_num_clients, 
         fraction_eval = 0,
         min_fit_clients=10,
         min_available_clients=total_num_clients,  # All clients should be available
         eval_fn=get_eval_fn(), 
         server_learning_rate = 1.0, 
-        server_momentum = 0.9,
+        server_momentum = args.beta,
         initial_parameters = weights_to_parameters(init_model.get_weights())# centralised testset evaluation of global model
     )
-    dp_strategy = DPAdaptiveClipStrategy(strategy, num_sampled_clients=100, noise_multiplier=0, init_clip_norm=0.1, clip_norm_lr=0.2, clip_norm_target_quantile=args.target_quantile)
+    dp_strategy = DPAdaptiveClipStrategy(strategy, total_num_clients, 1)
 
     def client_fn(cid: str):
         # create a single client instance
@@ -111,14 +111,14 @@ if __name__ == "__main__":
     print("Starting training")
     # start simulation
     results_dir = Path(args.results_dir)
-    path_to_save_metrics = results_dir / "rounds_{}_targetquantile_{}".format(args.num_rounds, args.target_quantile)
+    path_to_save_metrics = results_dir / "beta_{}_run_{}".format(args.beta, args.run_num)
 
     if  not path_to_save_metrics.exists():
         Path.mkdir(path_to_save_metrics, parents=True)
     fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=total_num_clients,
-        num_rounds=args.num_rounds,
+        num_rounds=100,
         strategy=dp_strategy,
         ray_init_args=ray_config,
         client_resources = client_resources,

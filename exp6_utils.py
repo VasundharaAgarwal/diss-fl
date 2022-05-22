@@ -29,10 +29,13 @@ def get_model():
           128, activation='relu', kernel_initializer=initializer),
       tf.keras.layers.Dropout(0.5),
       tf.keras.layers.Dense(
-          62,
-          activation=tf.nn.softmax,
-          kernel_initializer=initializer),
+          62),
   ])
+    # model = tf.keras.models.Sequential([
+    #   tf.keras.layers.Reshape(input_shape=(28, 28, 1), target_shape=(28 * 28,)),
+    #   tf.keras.layers.Dense(200, activation=tf.nn.relu),
+    #   tf.keras.layers.Dense(200, activation=tf.nn.relu),
+    #   tf.keras.layers.Dense(10)])
     model.compile(optimizer = tf.keras.optimizers.SGD(0.032), loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
     return model
 
@@ -41,7 +44,7 @@ def element_fn(element):
     return (tf.expand_dims(element['pixels'], -1), element['label'])
 
 def get_emnist_dataset():
-  emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data()
+  emnist_train, emnist_test = tff.simulation.datasets.emnist.load_data(only_digits=False)
 
 
   def preprocess_train_dataset(dataset):
